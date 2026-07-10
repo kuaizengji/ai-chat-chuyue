@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Shotalk</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --body-bg: #f5f5f7;
+    --header-bg: #fafafa;
+    --bubble-sho: #f0f0f5;
+    --bubble-user: #e94560;
+    --text: #1a1a2e;
+    --text-secondary: #8e8e93;
+    --text-user-bubble: #ffffff;
+    --input-bg: #fafafa;
+    --border: #e5e5ea;
+    --accent: #e94560;
+    --accent-soft: #ff6b81;
+    --card-bg: #ffffff;
+    --card-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --otter-brown: #c4956a;
+    --otter-water: #5b9bd5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: var(--body-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .phone-frame {
+    width: 100%;
+    max-width: 420px;
+    height: 100vh;
+    max-height: 850px;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 1px var(--border);
+  }
+
+  @media (min-width: 430px) {
+    .phone-frame {
+      border-radius: 24px;
+      margin: 20px;
+      height: calc(100vh - 40px);
+      max-height: 850px;
+    }
+  }
+
+  /* ========== 欢迎页 ========== */
+  .welcome-overlay {
+    position: absolute;
+    inset: 0;
+    background: #ffffff;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    transition: opacity 0.5s, visibility 0.5s;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .welcome-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .otter-decor {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+    padding-bottom: 8px;
+  }
+
+  .otter-float {
+    position: absolute;
+    font-size: 28px;
+    animation: otterFloat 3s ease-in-out infinite;
+    z-index: 2;
+  }
+
+  .otter-float.f1 { top: 30px; left: calc(50% - 110px); animation-delay: 0s; }
+  .otter-float.f2 { top: 60px; right: calc(50% - 110px); animation-delay: 0.8s; font-size: 22px; }
+  .otter-float.f3 { top: 80px; left: calc(50% - 90px); animation-delay: 1.6s; font-size: 20px; }
+
+  @keyframes otterFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-8px) rotate(3deg); }
+    75% { transform: translateY(-4px) rotate(-3deg); }
+  }
+
+  .otter-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--otter-brown);
+    box-shadow: 0 2px 16px rgba(196, 149, 106, 0.2);
+    position: relative;
+    z-index: 1;
+  }
+
+  .otter-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .welcome-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 14px;
+    letter-spacing: 2px;
+  }
+
+  .welcome-subtitle {
+    font-size: 13px;
+    color: var(--otter-brown);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  .idol-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 18px 22px;
+    margin: 18px 24px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    width: calc(100% - 48px);
+    max-width: 340px;
+  }
+
+  .idol-card .tag-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .idol-card .tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    background: rgba(196, 149, 106, 0.1);
+    color: var(--otter-brown);
+  }
+
+  .idol-card .bio {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  .idol-card .bio .highlight {
+    color: var(--otter-brown);
+    font-weight: 600;
+  }
+
+  /* 昵称设置 */
+  .nickname-section {
+    margin: 0 24px;
+    width: calc(100% - 48px);
+    max-width: 340px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .nickname-section .label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nickname-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .nickname-row input {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--body-bg);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+  }
+
+  .nickname-row input:focus {
+    border-color: var(--otter-water);
+  }
+
+  .nickname-row input::placeholder {
+    color: #c7c7cc;
+  }
+
+  .nickname-row button {
+    padding: 9px 16px;
+    border-radius: 20px;
+    border: none;
+    background: var(--otter-water);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.1s;
+  }
+
+  .nickname-row button:active {
+    transform: scale(0.95);
+  }
+
+  .day-count {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--otter-brown);
+    display: none;
+  }
+
+  .day-count.show { display: block; }
+
+  .day-count .days-num {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--otter-brown);
+  }
+
+  .enter-btn {
+    margin: 18px 24px 40px;
+    padding: 13px 0;
+    width: calc(100% - 48px);
+    max-width: 340px;
+    border-radius: 25px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .enter-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 4px 16px rgba(233, 68, 96, 0.3);
+  }
+
+  /* ========== 聊天头部 ========== */
+  .header {
+    background: var(--header-bg);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .header-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--otter-brown);
+    flex-shrink: 0;
+  }
+
+  .header-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .header-subtitle {
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .header-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+  }
+
+  .header-btn:active {
+    background: var(--bubble-sho);
+  }
+
+  /* ========== ℹ️ 弹出卡片 ========== */
+  .info-modal-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+
+  .info-modal-bg.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .info-modal {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 26px 22px 18px;
+    width: 85%;
+    max-width: 300px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    animation: modalIn 0.3s ease-out;
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(0.9) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .info-modal .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .info-modal .modal-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 10px;
+    border: 2px solid var(--otter-brown);
+  }
+
+  .info-modal .modal-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .info-modal .modal-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+
+  .info-modal .modal-role {
+    font-size: 11px;
+    color: var(--otter-brown);
+    margin-top: 2px;
+  }
+
+  .info-modal .otter-divider {
+    margin: 14px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .info-modal .otter-divider .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 50px;
+  }
+
+  .info-modal .otter-divider .icon {
+    font-size: 18px;
+  }
+
+  .info-modal .modal-bio {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    text-align: left;
+    padding: 0 4px;
+  }
+
+  .info-modal .modal-stats {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .info-modal .stat {
+    text-align: center;
+  }
+
+  .info-modal .stat-val {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--otter-brown);
+  }
+
+  .info-modal .stat-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* ========== 聊天区 ========== */
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    background-color: #ffffff;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-blend-mode: overlay;
+  }
+
+  .chat-area::-webkit-scrollbar { width: 3px; }
+  .chat-area::-webkit-scrollbar-thumb { background: #d0d0d5; border-radius: 10px; }
+
+  .date-divider {
+    text-align: center;
+    margin: 6px 0;
+  }
+
+  .date-divider span {
+    font-size: 10px;
+    color: var(--text-secondary);
+    background: var(--body-bg);
+    padding: 3px 10px;
+    border-radius: 8px;
+  }
+
+  /* 消息气泡 */
+  .message-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    max-width: 84%;
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  .message-row.sho { align-self: flex-start; }
+  .message-row.user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .msg-avatar-small {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1.5px solid var(--otter-brown);
+  }
+
+  .msg-avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bubble {
+    padding: 9px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .message-row.sho .bubble {
+    background: var(--bubble-sho);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+
+  .message-row.user .bubble {
+    background: var(--bubble-user);
+    color: var(--text-user-bubble);
+    border-bottom-right-radius: 4px;
+  }
+
+  .bubble .msg-time {
+    font-size: 10px;
+    margin-top: 3px;
+    display: block;
+    text-align: right;
+    opacity: 0.5;
+  }
+
+  .message-row.user .bubble .msg-time {
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* 翻译按钮 + 翻译结果 */
+  .translate-btn {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--otter-water);
+    cursor: pointer;
+    margin-top: 4px;
+    user-select: none;
+    font-weight: 600;
+  }
+
+  .translate-btn:hover { opacity: 0.7; }
+  .translate-btn.loading { color: var(--text-secondary); cursor: default; }
+
+  .translation-text {
+    margin-top: 4px;
+    padding: 6px 10px;
+    background: rgba(91, 155, 213, 0.06);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    border-left: 2px solid var(--otter-water);
+    animation: fadeInUp 0.25s ease-out;
+  }
+
+  /* 正在输入 */
+  .typing-indicator {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    max-width: 84%;
+    align-self: flex-start;
+  }
+
+  .typing-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1.5px solid var(--otter-brown);
+  }
+
+  .typing-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .typing-bubble {
+    background: var(--bubble-sho);
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .typing-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    animation: typingBounce 1.4s ease-in-out infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 锁提示 */
+  .lock-notice {
+    text-align: center;
+    padding: 6px;
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  .lock-notice span {
+    font-size: 10px;
+    color: var(--text-secondary);
+    background: rgba(233, 68, 96, 0.06);
+    padding: 4px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(233, 68, 96, 0.15);
+  }
+
+  /* ========== 底部输入区 ========== */
+  .input-area {
+    background: var(--input-bg);
+    padding: 8px 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .input-area.locked {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .counter {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-align: center;
+    flex-shrink: 0;
+    min-width: 18px;
+    line-height: 1.2;
+  }
+
+  .counter .num {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+
+  .input-wrapper { flex: 1; }
+
+  #msgInput {
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #msgInput:focus { border-color: var(--accent); }
+  #msgInput::placeholder { color: #c7c7cc; }
+
+  .send-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s, background 0.2s;
+  }
+
+  .send-btn:active { transform: scale(0.9); }
+  .send-btn:disabled { background: #d0d0d5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="phone-frame" id="app">
+
+  <!-- ==================== 欢迎页 ==================== -->
+  <div class="welcome-overlay" id="welcome">
+    <div class="otter-decor">
+      <div class="otter-float f1">🦦</div>
+      <div class="otter-float f2">🫧</div>
+      <div class="otter-float f3">💫</div>
+      <div class="otter-circle">
+        <img src="/头像.jpg" alt="Sho" onerror="this.parentElement.innerHTML='<span style=font-size:50px>🕺</span>'">
+      </div>
+    </div>
+
+    <div class="welcome-title">Sho</div>
+    <div class="welcome-subtitle">Shotalk</div>
+
+    <div style="margin:8px auto;text-align:center;">
+      <img src="/水獭元素.jpg" alt="🦦" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--otter-brown);opacity:0.85;">
+    </div>
+
+    <div class="idol-card">
+      <div class="tag-row">
+        <span class="tag">Dancer</span>
+        <span class="tag">Kanagawa</span>
+        <span class="tag">Ramen</span>
+      </div>
+      <div class="bio">
+        日本神奈川出身，首尔出道<br>
+        现在是你 <span class="highlight">Shotalk</span> 上的 소중한 사람
+      </div>
+    </div>
+
+    <div class="nickname-section">
+      <div class="label">Sho 该怎么称呼你？</div>
+      <div class="nickname-row">
+        <input type="text" id="nicknameInput" placeholder="你的昵称" maxlength="20" autocomplete="off">
+        <button onclick="saveNickname()">Save</button>
+      </div>
+      <div class="day-count" id="dayCount">
+        你和 Sho 已经聊了 <span class="days-num" id="daysNum">1</span> 天
+      </div>
+    </div>
+
+    <button class="enter-btn" onclick="enterShotalk()">Open</button>
+
+    <button onclick="clearAllHistory();alert('History cleared.');location.reload();" style="margin-bottom:40px;padding:8px 20px;border-radius:16px;border:1px solid var(--border);background:#fff;color:var(--text-secondary);font-size:12px;cursor:pointer;">Clear History</button>
+  </div>
+
+  <!-- ==================== ℹ️ 人物卡弹窗 ==================== -->
+  <div class="info-modal-bg" id="infoModalBg" onclick="closeInfoModal(event)">
+    <div class="info-modal" id="infoModal">
+      <button class="close-btn" onclick="closeInfoModal()">&#10005;</button>
+      <div class="modal-avatar">
+        <img src="/头像.jpg" alt="Sho" onerror="this.parentElement.innerHTML='<span style=font-size:40px>🕺</span>'">
+      </div>
+      <div class="modal-name">Sho</div>
+      <div class="modal-role">Shotalk Artist</div>
+
+      <div style="margin:10px auto;width:60px;height:60px;border-radius:50%;overflow:hidden;border:2px solid var(--otter-brown);opacity:0.85;">
+        <img src="/sho的动物塑.jpg" alt="🦦" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+
+      <div class="otter-divider">
+        <span class="line"></span><span class="icon">🦦</span><span class="line"></span>
+      </div>
+
+      <div class="modal-bio">
+        日本神奈川出身<br>
+        popping / locking / waacking<br>
+        看到拉面走不动路<br>
+        <br>
+        <em>"당신의 메시지가 내 하루를 바꿔요."</em>
+      </div>
+
+      <div class="modal-stats">
+        <div class="stat">
+          <div class="stat-val" id="modalDays">1</div>
+          <div class="stat-label">Days</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="modalMsgs">0</div>
+          <div class="stat-label">Messages</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">🦦</div>
+          <div class="stat-label">Spirit Animal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 背景选择弹窗 ==================== -->
+  <div class="info-modal-bg" id="bgPickerBg" onclick="closeBgPicker(event)">
+    <div class="info-modal" style="max-width:320px;">
+      <button class="close-btn" onclick="closeBgPicker()">&#10005;</button>
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px;">Chat Background</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:14px;">选择喜欢的背景</div>
+      <div id="bgOptions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;"></div>
+      <button onclick="clearBg()" style="margin-top:14px;padding:7px 18px;border-radius:14px;border:1px solid var(--border);background:#fff;color:var(--text-secondary);font-size:11px;cursor:pointer;">Default</button>
+    </div>
+  </div>
+
+  <!-- ==================== 聊天头部 ==================== -->
+  <div class="header">
+    <button class="header-btn" onclick="goBackToWelcome()" style="font-size:16px;padding:4px 8px;">&#8249;</button>
+    <div class="header-avatar">
+      <img src="/头像.jpg" alt="Sho" onerror="this.parentElement.innerHTML='<span style=font-size:20px>🕺</span>'">
+    </div>
+    <div class="header-info">
+      <div class="header-name">Sho</div>
+      <div class="header-subtitle">online</div>
+    </div>
+    <button class="header-btn" onclick="openBgPicker()">BG</button>
+    <button class="header-btn" onclick="openInfoModal()">Info</button>
+  </div>
+
+  <!-- ==================== 聊天区 ==================== -->
+  <div class="chat-area" id="chatArea"></div>
+
+  <!-- ==================== 输入区 ==================== -->
+  <div class="input-area" id="inputArea">
+    <div class="counter" id="counter">
+      <span class="num" id="counterNum">3</span>
+      <span>left</span>
+    </div>
+    <div class="input-wrapper">
+      <input type="text" id="msgInput" placeholder="Message Sho..." autocomplete="off" maxlength="300">
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">&#8593;</button>
+  </div>
+
+</div>
+
+<script>
+// ==================== 常量 ====================
+const MAX_MSGS = 3;
+const AUTO_SEND_DELAY = 45000;
+const STORAGE_KEY = 'shotalk_data';
+
+// ==================== 状态 ====================
+let msgCount = 0;
+let isWaiting = false;
+let chatHistory = [];
+let nickname = '';
+let firstVisitDate = null;
+let autoTimer = null;
+
+// ==================== DOM ====================
+const chatArea = document.getElementById('chatArea');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const inputArea = document.getElementById('inputArea');
+const counterNum = document.getElementById('counterNum');
+const welcome = document.getElementById('welcome');
+const nicknameInput = document.getElementById('nicknameInput');
+const dayCount = document.getElementById('dayCount');
+const daysNum = document.getElementById('daysNum');
+const infoModalBg = document.getElementById('infoModalBg');
+
+// ==================== 工具 ====================
+function getTime() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function scrollBottom() {
+  requestAnimationFrame(function() {
+    chatArea.scrollTop = chatArea.scrollHeight;
+  });
+}
+
+// ==================== 持久化 ====================
+function loadData() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      var data = JSON.parse(raw);
+      chatHistory = data.chatHistory || [];
+      nickname = data.nickname || '';
+      firstVisitDate = data.firstVisit || new Date().toISOString();
+    } else {
+      firstVisitDate = new Date().toISOString();
+      saveData();
+    }
+  } catch(e) {
+    chatHistory = [];
+    nickname = '';
+    firstVisitDate = new Date().toISOString();
+  }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    chatHistory: chatHistory,
+    nickname: nickname,
+    firstVisit: firstVisitDate
+  }));
+}
+
+function clearAllHistory() {
+  chatHistory = [];
+  autoTranslate = null;
+  translatePromptShown = false;
+  localStorage.removeItem('shotalk_auto_translate');
+  saveData();
+  chatArea.innerHTML = '';
+  if (welcome.classList.contains('hidden')) {
+    addDateDividerToDOM(new Date());
+    var greetName = nickname || '당신';
+    var greeting = '안녕하세요, ' + escapeHtml(greetName) + '님.\n\nSho예요. 들어와 줘서 고마워요.\n오늘 하루는 어땠어요?';
+    addBubbleToDOM('sho', escapeHtml(greeting), getTime(), '');
+    chatHistory.push({ role: 'assistant', content: greeting, _translation: '' });
+    saveData();
+    scrollBottom();
+  }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    chatHistory: chatHistory,
+    nickname: nickname,
+    firstVisit: firstVisitDate
+  }));
+}
+
+function getChatDays() {
+  if (!firstVisitDate) return 1;
+  var first = new Date(firstVisitDate);
+  var now = new Date();
+  var diff = Math.floor((now - first) / (1000 * 60 * 60 * 24)) + 1;
+  return Math.max(1, diff);
+}
+
+function getTotalUserMessages() {
+  return chatHistory.filter(function(m) { return m.role === 'user'; }).length;
+}
+
+// ==================== 渲染历史 ====================
+function renderHistory() {
+  chatArea.innerHTML = '';
+  if (chatHistory.length === 0) return;
+
+  var firstDate = firstVisitDate ? new Date(firstVisitDate) : new Date();
+  addDateDividerToDOM(firstDate);
+
+  chatHistory.forEach(function(msg) {
+    var who = msg.role === 'assistant' ? 'sho' : 'user';
+    addBubbleToDOM(who, escapeHtml(msg.content), '', msg._translation || '');
+  });
+
+  scrollBottom();
+  autoTranslateHistory();
+}
+
+function addDateDividerToDOM(dateObj) {
+  var weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var label = dateObj.getFullYear() + '.' + (dateObj.getMonth()+1) + '.' + dateObj.getDate() + ' ' + weekdays[dateObj.getDay()];
+  var div = document.createElement('div');
+  div.className = 'date-divider';
+  div.innerHTML = '<span>' + label + '</span>';
+  chatArea.appendChild(div);
+}
+
+function addBubbleToDOM(who, text, time, existingTranslation) {
+  var row = document.createElement('div');
+  row.className = 'message-row ' + who;
+
+  if (who === 'sho') {
+    var timeHTML = time ? '<span class="msg-time">' + time + '</span>' : '';
+    var translateHTML = '<div class="translate-btn" onclick="translateMessage(this)" data-text="' + escapeHtml(text.replace(/<[^>]*>/g,'')) + '">Translate</div>';
+    var transBlock = existingTranslation ? '<div class="translation-text">' + escapeHtml(existingTranslation) + '</div>' : '';
+    row.innerHTML = '<div class="msg-avatar-small"><img src="/头像.jpg" alt="Sho" onerror="this.style.display=\'none\'"></div><div class="bubble">' + text + timeHTML + translateHTML + transBlock + '</div>';
+  } else {
+    var timeHTML2 = time ? '<span class="msg-time">' + time + '</span>' : '';
+    row.innerHTML = '<div class="bubble">' + text + timeHTML2 + '</div>';
+  }
+
+  chatArea.appendChild(row);
+}
+
+// ==================== 翻译功能 ====================
+async function translateMessage(btn) {
+  // 如果已经翻译过了，不重复请求
+  var bubble = btn.parentElement;
+  if (bubble.querySelector('.translation-text')) return;
+
+  var text = btn.getAttribute('data-text');
+  btn.textContent = '...';
+  btn.classList.add('loading');
+
+  try {
+    var res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    });
+    var data = await res.json();
+
+    if (data.translation) {
+      var transDiv = document.createElement('div');
+      transDiv.className = 'translation-text';
+      transDiv.textContent = data.translation;
+      bubble.appendChild(transDiv);
+
+      // 保存翻译到 chatHistory
+      var idx = findChatIndex(text);
+      if (idx >= 0) {
+        chatHistory[idx]._translation = data.translation;
+        saveData();
+      }
+    }
+  } catch(e) {
+    // 翻译失败静默
+  }
+
+  btn.textContent = 'Translate';
+  btn.classList.remove('loading');
+  scrollBottom();
+}
+
+function findChatIndex(text) {
+  for (var i = chatHistory.length - 1; i >= 0; i--) {
+    if (chatHistory[i].role === 'assistant' && chatHistory[i].content === text) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+// ==================== 昵称 ====================
+function saveNickname() {
+  var val = nicknameInput.value.trim();
+  if (val) {
+    nickname = val;
+    nicknameInput.value = val;
+    saveData();
+    var btn = nicknameInput.nextElementSibling;
+    btn.textContent = 'Saved';
+    btn.style.background = '#4CAF50';
+    setTimeout(function() {
+      btn.textContent = 'Save';
+      btn.style.background = '';
+    }, 1500);
+  }
+}
+
+// ==================== 欢迎页初始化 ====================
+function initWelcome() {
+  loadData();
+  if (nickname) {
+    nicknameInput.value = nickname;
+  }
+  var days = getChatDays();
+  daysNum.textContent = days;
+  dayCount.classList.add('show');
+
+  nicknameInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveNickname();
+    }
+  });
+}
+
+// ==================== 进入聊天 ====================
+function enterShotalk() {
+  if (nicknameInput.value.trim() && !nickname) {
+    saveNickname();
+  }
+  if (nicknameInput.value.trim()) {
+    nickname = nicknameInput.value.trim();
+    saveData();
+  }
+
+  welcome.classList.add('hidden');
+
+  if (chatHistory.length > 0) {
+    renderHistory();
+    updateCounter();
+    startAutoTimer();
+  } else {
+    renderFirstGreeting();
+  }
+
+  msgInput.focus();
+}
+
+function goBackToWelcome() {
+  welcome.classList.remove('hidden');
+  updateWelcomeStats();
+  msgInput.blur();
+}
+
+// ==================== 自动翻译弹窗 ====================
+var autoTranslateRaw = localStorage.getItem('shotalk_auto_translate');
+var autoTranslate = (autoTranslateRaw === 'true' || autoTranslateRaw === true) ? 'true' : (autoTranslateRaw === 'false' ? 'false' : null);
+var translatePromptShown = false;
+
+function showAutoTranslatePrompt() {
+  if (translatePromptShown || autoTranslate !== null) return;
+  translatePromptShown = true;
+
+  var overlay = document.createElement('div');
+  overlay.id = 'autoTransPrompt';
+  overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.4);z-index:25;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:22px 20px;width:80%;max-width:280px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.15);">'
+    + '<div style="font-size:15px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">Auto-translate?</div>'
+    + '<div style="font-size:13px;color:#8e8e93;margin-bottom:18px;line-height:1.5;">Sho writes in Korean.<br>Automatically show Chinese translation?</div>'
+    + '<div style="display:flex;gap:10px;justify-content:center;">'
+    + '<button onclick="setAutoTranslate(true)" style="padding:9px 22px;border-radius:20px;border:none;background:#e94560;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Yes, always</button>'
+    + '<button onclick="setAutoTranslate(false)" style="padding:9px 22px;border-radius:20px;border:1px solid #e5e5ea;background:#fff;color:#8e8e93;font-size:13px;cursor:pointer;">No thanks</button>'
+    + '</div></div>';
+  document.getElementById('app').appendChild(overlay);
+}
+
+function setAutoTranslate(val) {
+  autoTranslate = val ? 'true' : 'false';
+  localStorage.setItem('shotalk_auto_translate', autoTranslate);
+  var el = document.getElementById('autoTransPrompt');
+  if (el) el.remove();
+
+  // 如果选了yes，翻译当前所有Sho消息
+  if (autoTranslate === 'true') {
+    translateAllShoBubbles();
+  }
+}
+
+async function translateAllShoBubbles() {
+  var bubbles = document.querySelectorAll('.message-row.sho .translate-btn');
+  for (var i = 0; i < bubbles.length; i++) {
+    var bubble = bubbles[i].parentElement;
+    if (!bubble.querySelector('.translation-text')) {
+      await translateMessage(bubbles[i]);
+    }
+  }
+}
+
+async function translateLatestSho() {
+  var bubbles = document.querySelectorAll('.message-row.sho .translate-btn');
+  if (bubbles.length > 0) {
+    var lastBtn = bubbles[bubbles.length - 1];
+    var bubble = lastBtn.parentElement;
+    if (!bubble.querySelector('.translation-text')) {
+      await translateMessage(lastBtn);
+    }
+  }
+}
+
+// 渲染历史时也自动翻译（如果开启了auto-translate）
+function autoTranslateHistory() {
+  if (autoTranslate === 'true') {
+    setTimeout(function() { translateAllShoBubbles(); }, 500);
+  }
+}
+
+function updateWelcomeStats() {
+  daysNum.textContent = getChatDays();
+  if (nickname) nicknameInput.value = nickname;
+}
+
+async function renderFirstGreeting() {
+  addDateDividerToDOM(new Date());
+
+  var greetName = nickname || '당신';
+  var greeting = '안녕하세요, ' + escapeHtml(greetName) + '님.\n\nSho예요. 들어와 줘서 고마워요.\n오늘 하루는 어땠어요?';
+
+  addBubbleToDOM('sho', escapeHtml(greeting), getTime(), '');
+  chatHistory.push({ role: 'assistant', content: greeting, _translation: '' });
+  saveData();
+  scrollBottom();
+  startAutoTimer();
+}
+
+// ==================== 发送消息 ====================
+async function sendMessage() {
+  var text = msgInput.value.trim();
+  if (!text || isWaiting || msgCount >= MAX_MSGS) return;
+
+  var now = getTime();
+  addBubbleToDOM('user', escapeHtml(text), now, '');
+  msgInput.value = '';
+  msgInput.focus();
+
+  chatHistory.push({ role: 'user', content: text, _translation: '' });
+  saveData();
+
+  msgCount++;
+  updateCounter();
+
+  if (msgCount >= MAX_MSGS) {
+    lockInput();
+    addLockNoticeToDOM();
+  }
+
+  clearAutoTimer();
+  isWaiting = true;
+  sendBtn.disabled = true;
+  addTypingToDOM();
+
+  try {
+    var now2 = new Date();
+    var hour = now2.getHours();
+    var timeContext = hour < 6 ? '새벽' : hour < 12 ? '아침' : hour < 14 ? '점심' : hour < 18 ? '오후' : hour < 22 ? '저녁' : '늦은 밤';
+    var nickContext = nickname ? '상대방 이름은 "' + nickname + '"입니다. 가끔 이름을 불러 주세요.' : '상대방이 아직 이름을 알려주지 않았어요.';
+
+    var apiMessages = chatHistory.map(function(m) {
+      return { role: m.role, content: m.content };
+    });
+
+    // 在末尾追加当前时间上下文
+    apiMessages.push({ role: 'system', content: '반드시 한국어로만 답장하세요. 지금은 ' + timeContext + '입니다. ' + nickContext });
+
+    var res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: apiMessages })
+    });
+
+    var data = await res.json();
+    removeTypingFromDOM();
+
+    if (data.reply) {
+      addBubbleToDOM('sho', escapeHtml(data.reply), getTime(), '');
+      chatHistory.push({ role: 'assistant', content: data.reply, _translation: '' });
+      saveData();
+      showAutoTranslatePrompt();
+      if (autoTranslate === 'true') translateLatestSho();
+    } else {
+      var fb = '죄송해요, 지금 연결이 안 좋아요.\n잠시만 기다려 주세요.';
+      addBubbleToDOM('sho', escapeHtml(fb), getTime(), '');
+      chatHistory.push({ role: 'assistant', content: fb, _translation: '' });
+      saveData();
+    }
+
+    unlockInput();
+    startAutoTimer();
+
+  } catch(err) {
+    removeTypingFromDOM();
+    var fb2 = '연결이 끊겼어요... 다시 올게요.';
+    addBubbleToDOM('sho', escapeHtml(fb2), getTime(), '');
+    chatHistory.push({ role: 'assistant', content: fb2, _translation: '' });
+    saveData();
+    unlockInput();
+    startAutoTimer();
+  }
+
+  isWaiting = false;
+  sendBtn.disabled = false;
+  scrollBottom();
+}
+
+// ==================== Sho 主动发消息 ====================
+function startAutoTimer() {
+  clearAutoTimer();
+  autoTimer = setTimeout(autoSendFromSho, AUTO_SEND_DELAY);
+}
+
+function clearAutoTimer() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+}
+
+async function autoSendFromSho() {
+  if (isWaiting || inputArea.classList.contains('locked')) {
+    startAutoTimer();
+    return;
+  }
+
+  isWaiting = true;
+  addTypingToDOM();
+
+  var now = new Date();
+  var hour = now.getHours();
+  var timeContext = hour < 6 ? '새벽' : hour < 12 ? '아침' : hour < 14 ? '점심' : hour < 18 ? '오후' : hour < 22 ? '저녁' : '늦은 밤';
+  var nickContext = nickname ? '상대방은 "' + nickname + '"입니다.' : '';
+
+  try {
+    var res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: chatHistory.map(function(m) { return { role: m.role, content: m.content }; })
+          .concat([{ role: 'system', content: '반드시 한국어로만 답장하세요. ' + '지금은 ' + timeContext + '입니다. ' + nickContext + ' 한동안 대화가 없었어요. 질문에 답하는 게 아니라, 지금 네 상태나 기분을 팬에게 먼저 공유하는 거예요. 1-2문장, 짧고 따뜻하게.' }])
+      })
+    });
+
+    var data = await res.json();
+    removeTypingFromDOM();
+
+    if (data.reply) {
+      addBubbleToDOM('sho', escapeHtml(data.reply), getTime(), '');
+      chatHistory.push({ role: 'assistant', content: data.reply, _translation: '' });
+      saveData();
+      if (autoTranslate === 'true') translateLatestSho();
+    }
+
+    if (inputArea.classList.contains('locked')) {
+      unlockInput();
+    }
+
+  } catch(err) {
+    removeTypingFromDOM();
+  }
+
+  isWaiting = false;
+  sendBtn.disabled = false;
+  msgCount = 0;
+  updateCounter();
+  scrollBottom();
+  startAutoTimer();
+}
+
+// ==================== 锁定/解锁 ====================
+function lockInput() {
+  inputArea.classList.add('locked');
+  sendBtn.disabled = true;
+  msgInput.disabled = true;
+  msgInput.placeholder = 'Wait for Sho...';
+}
+
+function unlockInput() {
+  inputArea.classList.remove('locked');
+  sendBtn.disabled = false;
+  msgInput.disabled = false;
+  msgInput.placeholder = 'Message Sho...';
+  msgCount = 0;
+  updateCounter();
+}
+
+function updateCounter() {
+  var remaining = MAX_MSGS - msgCount;
+  counterNum.textContent = remaining;
+  counterNum.style.color = remaining <= 1 ? '#e94560' : '#c4956a';
+}
+
+function addLockNoticeToDOM() {
+  var div = document.createElement('div');
+  div.className = 'lock-notice';
+  div.innerHTML = '<span>Sent 3 messages. Wait for Sho.</span>';
+  chatArea.appendChild(div);
+  scrollBottom();
+}
+
+// ==================== 正在输入 ====================
+function addTypingToDOM() {
+  var row = document.createElement('div');
+  row.className = 'typing-indicator';
+  row.id = 'typingIndicator';
+  row.innerHTML = '<div class="typing-avatar"><img src="/头像.jpg" alt="Sho" onerror="this.style.display=\'none\'"></div><div class="typing-bubble">Sho is typing<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  chatArea.appendChild(row);
+  scrollBottom();
+}
+
+function removeTypingFromDOM() {
+  var el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+// ==================== ℹ️ 人物卡片 ====================
+function openInfoModal() {
+  document.getElementById('modalDays').textContent = getChatDays();
+  document.getElementById('modalMsgs').textContent = getTotalUserMessages();
+  infoModalBg.classList.add('show');
+}
+
+function closeInfoModal(e) {
+  if (e && e.target !== infoModalBg) return;
+  infoModalBg.classList.remove('show');
+}
+
+// ==================== 背景选择 ====================
+var BG_OPTIONS = [
+  { name: 'Default', file: null },
+  { name: 'Chat BG', file: '/聊天背景.jpg' },
+  { name: 'Matcha 1', file: '/bg-matcha-1.jpg' },
+  { name: 'Matcha 2', file: '/bg-matcha-2.jpg' }
+];
+
+function getSavedBg() {
+  return localStorage.getItem('shotalk_bg') || null;
+}
+
+function applyBackground(bgFile) {
+  if (bgFile) {
+    chatArea.style.backgroundImage = 'url(' + bgFile + ')';
+    chatArea.style.backgroundColor = 'rgba(255,255,255,0.15)';
+  } else {
+    chatArea.style.backgroundImage = '';
+    chatArea.style.backgroundColor = '#ffffff';
+  }
+}
+
+function selectBg(bgFile) {
+  if (bgFile) {
+    localStorage.setItem('shotalk_bg', bgFile);
+  } else {
+    localStorage.removeItem('shotalk_bg');
+  }
+  applyBackground(bgFile);
+  closeBgPicker();
+}
+
+function clearBg() {
+  selectBg(null);
+}
+
+function openBgPicker() {
+  var container = document.getElementById('bgOptions');
+  var currentBg = getSavedBg();
+  container.innerHTML = BG_OPTIONS.map(function(bg) {
+    var isActive = (bg.file === currentBg) || (!bg.file && !currentBg);
+    var border = isActive ? '2px solid var(--otter-brown)' : '2px solid transparent';
+    var bgStyle = bg.file
+      ? 'background-image:url(' + bg.file + ');background-size:cover;background-position:center;'
+      : 'background:#f5f5f7;';
+    var onclick = bg.file ? "selectBg('" + bg.file + "')" : "selectBg(null)";
+    return '<div onclick="' + onclick + '" style="width:65px;height:85px;border-radius:10px;cursor:pointer;' + bgStyle + 'border:' + border + ';display:flex;align-items:flex-end;justify-content:center;overflow:hidden;">'
+      + '<span style="font-size:10px;color:#666;background:rgba(255,255,255,0.85);width:100%;text-align:center;padding:3px 0;">' + bg.name + '</span></div>';
+  }).join('');
+  document.getElementById('bgPickerBg').classList.add('show');
+}
+
+function closeBgPicker(e) {
+  var bg = document.getElementById('bgPickerBg');
+  if (e && e.target !== bg) return;
+  bg.classList.remove('show');
+}
+
+// ==================== 键盘事件 ====================
+msgInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// ==================== 初始化 ====================
+loadData();
+initWelcome();
+updateCounter();
+applyBackground(getSavedBg());
+</script>
+
+</body>
+</html>
