@@ -653,6 +653,42 @@
     border: 1px solid rgba(233, 68, 96, 0.15);
   }
 
+  /* ========== 贴纸面板 ========== */
+  .sticker-panel {
+    background: #fafafa;
+    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    flex-shrink: 0;
+  }
+
+  .sticker-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .sticker-item {
+    font-size: 36px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 10px;
+    transition: background 0.15s;
+    user-select: none;
+    line-height: 1;
+  }
+
+  .sticker-item:active {
+    background: #e8e8ed;
+    transform: scale(1.15);
+  }
+
+  /* 贴纸消息（大号） */
+  .sticker-msg {
+    font-size: 64px;
+    line-height: 1;
+    padding: 4px;
+  }
+
   /* ========== 底部输入区 ========== */
   .input-area {
     background: var(--input-bg);
@@ -845,6 +881,9 @@
   <div class="chat-area" id="chatArea"></div>
 
   <!-- ==================== 输入区 ==================== -->
+  <div class="sticker-panel" id="stickerPanel" style="display:none;">
+    <div class="sticker-grid" id="stickerGrid"></div>
+  </div>
   <div class="input-area" id="inputArea">
     <div class="counter" id="counter">
       <span class="num" id="counterNum">3</span>
@@ -853,6 +892,7 @@
     <div class="input-wrapper">
       <input type="text" id="msgInput" placeholder="Message Sho..." autocomplete="off" maxlength="300">
     </div>
+    <button class="send-btn" id="stickerBtn" onclick="toggleStickerPanel()" title="Stickers" style="background:transparent;font-size:20px;">😊</button>
     <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">&#8593;</button>
   </div>
 
@@ -861,7 +901,8 @@
 <script>
 // ==================== 常量 ====================
 const MAX_MSGS = 3;
-const AUTO_SEND_DELAY = 45000;
+const AUTO_SEND_DELAY = 30000;
+const MAX_AUTO_MSGS = 3;
 const STORAGE_KEY = 'shotalk_data';
 
 // ==================== 状态 ====================
@@ -871,6 +912,7 @@ let chatHistory = [];
 let nickname = '';
 let firstVisitDate = null;
 let autoTimer = null;
+let autoMsgCount = 0;
 
 // ==================== DOM ====================
 const chatArea = document.getElementById('chatArea');
@@ -1291,11 +1333,18 @@ function startAutoTimer() {
 
 function clearAutoTimer() {
   if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  autoMsgCount = 0;
 }
 
 async function autoSendFromSho() {
   if (isWaiting || inputArea.classList.contains('locked')) {
     startAutoTimer();
+    return;
+  }
+
+  autoMsgCount++;
+  if (autoMsgCount > MAX_AUTO_MSGS) {
+    // 发完3条了，不再主动发
     return;
   }
 
@@ -1340,7 +1389,9 @@ async function autoSendFromSho() {
   msgCount = 0;
   updateCounter();
   scrollBottom();
-  startAutoTimer();
+  if (autoMsgCount < MAX_AUTO_MSGS) {
+    startAutoTimer();
+  }
 }
 
 // ==================== 锁定/解锁 ====================
@@ -1466,6 +1517,83 @@ msgInput.addEventListener('keydown', function(e) {
     sendMessage();
   }
 });
+
+// ==================== 贴纸 ====================
+var STICKERS = ['❤️','😆','🥲','🍜','🕺','🦦','💕','✨','🔥','😴','🍑','🐰','🎉','💌'];
+
+function buildStickerGrid() {
+  var grid = document.getElementById('stickerGrid');
+  grid.innerHTML = STICKERS.map(function(s) {
+    return '<span class="sticker-item" onclick="sendSticker(\'' + s + '\')">' + s + '</span>';
+  }).join('');
+}
+
+function toggleStickerPanel() {
+  var panel = document.getElementById('stickerPanel');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function sendSticker(sticker) {
+  if (isWaiting || msgCount >= MAX_MSGS) return;
+
+  var now = getTime();
+  var row = document.createElement('div');
+  row.className = 'message-row user';
+  row.innerHTML = '<div class="bubble"><span class="sticker-msg">' + sticker + '</span><span class="msg-time">' + now + '</span></div>';
+  chatArea.appendChild(row);
+  scrollBottom();
+
+  chatHistory.push({ role: 'user', content: '[Sticker: ' + sticker + ']' });
+  saveData();
+
+  // 关闭贴纸面板
+  document.getElementById('stickerPanel').style.display = 'none';
+
+  msgCount++;
+  updateCounter();
+
+  if (msgCount >= MAX_MSGS) {
+    lockInput();
+    addLockNoticeToDOM();
+  }
+
+  // 调后端——Sho也可能会回贴纸
+  clearAutoTimer();
+  isWaiting = true;
+  sendBtn.disabled = true;
+  addTypingToDOM();
+
+  var nickContext = nickname ? '상대방 이름은 "' + nickname + '"입니다.' : '';
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: chatHistory.map(function(m) { return { role: m.role, content: m.content }; })
+        .concat([{ role: 'system', content: '반드시 한국어로만 답장하세요. 상대방이 방금 스티커를 보냈어요: ' + sticker + '. ' + nickContext + ' 짧게 답장하거나, 어울리는 이모지로 답장해도 돼요. 1-2문장 + 이모지 하나.' }])
+    })
+  }).then(function(res) { return res.json(); }).then(function(data) {
+    removeTypingFromDOM();
+    if (data.reply) {
+      addBubbleToDOM('sho', escapeHtml(data.reply), getTime(), '');
+      chatHistory.push({ role: 'assistant', content: data.reply, _translation: '' });
+      saveData();
+      if (autoTranslate === 'true') translateLatestSho();
+    }
+    unlockInput();
+    startAutoTimer();
+  }).catch(function(err) {
+    removeTypingFromDOM();
+    unlockInput();
+    startAutoTimer();
+  });
+
+  isWaiting = false;
+  sendBtn.disabled = false;
+}
 
 // ==================== 初始化 ====================
 loadData();
